@@ -1,0 +1,69 @@
+version: '3'
+services:
+
+  backend:
+    container_name: webapi
+    build: ./webapi
+    #network_mode: "host"
+    ports:
+      # replace your webapp's .env 'REACT_APP_BACKEND_URI' with it
+      - 8080:80
+    environment:
+      - Kestrel__Endpoints__Https__Url=http://+:80
+      - AIService__Endpoint=https://sk-109-openai.openai.azure.com/
+      - AIService__Key=fc90983421984269a8b793c31897603d
+      - AIService__Models__Completion=gpt-35-turbo
+      - AIService__Models__Embedding=text-embedding-ada-002
+      - AIService__Models__Planner=gpt-35-turbo
+      - AIService__Type=AzureOpenAI
+      - AllowedOrigins__0=http://localhost:3000
+      - ChatStore__Filesystem__FilePath=./../data/chat/chatstore.json
+      - ChatStore__Type=filesystem
+      - MemoriesStore__Qdrant__Host=http://qdrant
+      - MemoriesStore__Type=qdrant
+    volumes:
+      - chat_store_data:/app/data
+    depends_on:
+      - frontend
+      - qdrant
+
+ 
+
+  frontend:
+    container_name: webapp
+    build: ./webapp
+    #network_mode: "host"    
+    ports:
+      - 3000:80
+    #environment:
+# Required Variables
+# If you add any new required variables, make sure you update the variables list in the checkEnv.ts file as well.
+      #- REACT_APP_BACKEND_URI="http://localhost:8080/"
+      #- REACT_APP_AAD_AUTHORITY="https://login.microsoftonline.com/common"
+      #- REACT_APP_AAD_CLIENT_ID="25116dd2-0f6a-483e-bd28-9d51ba050a1e"
+
+# Optional Variables
+      #- REACT_APP_SaK_API_KEY=
+
+# To enable HTTPS, uncomment the following variables
+# HTTPS="true"
+# Replace with your locally-trusted cert file
+#      - SSL_CRT_FILE=local-cert.crt
+# Replace with your locally-trusted cert key
+#      - SSL_KEY_FILE=local-cert.key
+
+
+  
+
+  qdrant:
+    container_name: qdarant
+    image: qdrant/qdrant:latest
+
+    ports:
+      - 6333:6333
+    volumes:
+      - qdrantV:/qdrant/storage
+
+volumes:
+  chat_store_data:
+  qdrantV:
