@@ -293,13 +293,12 @@ internal sealed class HuggingFaceClient
 
         string body = await this.SendRequestAndGetStringBodyAsync(httpRequestMessage, cancellationToken)
             .ConfigureAwait(false);
-
+        
+        // Attempt to deserialize as TextEmbeddingResponseType1
         var response = DeserializeResponse<TextEmbeddingResponse>(body);
-
-        // Currently only one embedding per data is supported
-        return response[0][0].ToList()!;
+        return response.ToList();
     }
-
+    
     private Uri GetEmbeddingGenerationEndpoint(string modelId)
         => new($"{this.Endpoint}{this.Separator}pipeline/feature-extraction/{modelId}");
 
